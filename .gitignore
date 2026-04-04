@@ -1,0 +1,16 @@
+# Environment
+.env
+.env.*
+
+# Python
+.venv/
+__pycache__/
+*.pyc
+
+# Build artifacts
+dist/
+build/
+
+# Logs and OS files
+*.log
+.DS_Store
