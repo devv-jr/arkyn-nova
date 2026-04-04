@@ -65,7 +65,9 @@ detect_user() {
 
 add_if_available() {
   local pkg="$1"
-  if apt-cache show "$pkg" >/dev/null 2>&1; then
+  local candidate
+  candidate=$(apt-cache policy "$pkg" 2>/dev/null | awk '/Candidate:/{print $2}')
+  if [[ -n "$candidate" && "$candidate" != "(none)" ]]; then
     PACKAGES+=("$pkg")
   else
     warn "Package not available in current repos: $pkg"
@@ -85,22 +87,27 @@ enable_nonfree_repos() {
 
   # Debian 12 usa el formato moderno .sources por defecto
   if [[ -f "$sources_d" ]]; then
-    if ! grep -q "non-free" "$sources_d"; then
-      log "Enabling contrib non-free non-free-firmware in $sources_d..."
-      sed -i 's/^Components: main$/Components: main contrib non-free non-free-firmware/' "$sources_d"
-    else
+    if grep -q "^Components:.*non-free" "$sources_d"; then
       log "non-free repos already enabled."
+    else
+      log "Enabling contrib non-free non-free-firmware in $sources_d..."
+      # Añade contrib non-free non-free-firmware a cualquier línea Components que solo tenga main
+      sed -i 's/^Components: \(.*\)$/Components: \1 contrib non-free non-free-firmware/' "$sources_d"
     fi
   elif [[ -f "$sources_file" ]]; then
-    if ! grep -q "non-free" "$sources_file"; then
+    if grep -q "non-free" "$sources_file"; then
+      log "non-free repos already enabled."
+    else
       log "Enabling contrib non-free non-free-firmware in $sources_file..."
       sed -i 's/\(deb .*bookworm[^ ]*\) main/\1 main contrib non-free non-free-firmware/' "$sources_file"
-    else
-      log "non-free repos already enabled."
     fi
   else
     warn "Could not locate apt sources file — NVIDIA packages may fail to install."
+    return
   fi
+
+  # Forzar refresh del cache tras modificar repos
+  apt-get update -qq
 }
 
 install_base_repo() {
