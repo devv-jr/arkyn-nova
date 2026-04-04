@@ -65,9 +65,9 @@ detect_user() {
 
 add_if_available() {
   local pkg="$1"
-  local candidate
-  candidate=$(apt-cache policy "$pkg" 2>/dev/null | awk '/Candidate:/{print $2}')
-  if [[ -n "$candidate" && "$candidate" != "(none)" ]]; then
+  # apt-cache policy puede reportar candidato para paquetes virtuales que no son
+  # realmente instalables. apt-get install --dry-run es el único check confiable.
+  if DEBIAN_FRONTEND=noninteractive apt-get install --dry-run "$pkg" >/dev/null 2>&1; then
     PACKAGES+=("$pkg")
   else
     warn "Package not available in current repos: $pkg"
