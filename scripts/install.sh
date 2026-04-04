@@ -79,7 +79,35 @@ enable_service() {
   fi
 }
 
+enable_nonfree_repos() {
+  local sources_d="/etc/apt/sources.list.d/debian.sources"
+  local sources_file="/etc/apt/sources.list"
+
+  # Debian 12 usa el formato moderno .sources por defecto
+  if [[ -f "$sources_d" ]]; then
+    if ! grep -q "non-free" "$sources_d"; then
+      log "Enabling contrib non-free non-free-firmware in $sources_d..."
+      sed -i 's/^Components: main$/Components: main contrib non-free non-free-firmware/' "$sources_d"
+    else
+      log "non-free repos already enabled."
+    fi
+  elif [[ -f "$sources_file" ]]; then
+    if ! grep -q "non-free" "$sources_file"; then
+      log "Enabling contrib non-free non-free-firmware in $sources_file..."
+      sed -i 's/\(deb .*bookworm[^ ]*\) main/\1 main contrib non-free non-free-firmware/' "$sources_file"
+    else
+      log "non-free repos already enabled."
+    fi
+  else
+    warn "Could not locate apt sources file — NVIDIA packages may fail to install."
+  fi
+}
+
 install_base_repo() {
+  if [[ "$INSTALL_NVIDIA" -eq 1 ]]; then
+    enable_nonfree_repos
+  fi
+
   log "Updating package lists..."
   apt-get update
 
@@ -181,13 +209,11 @@ install_packages() {
   add_if_available intel-microcode
 
   if [[ "$INSTALL_NVIDIA" -eq 1 ]]; then
-    # NVIDIA / hybrid graphics
-    PACKAGES+=(
-      nvidia-driver
-      nvidia-settings
-      nvidia-prime
-      firmware-misc-nonfree
-    )
+    log "Queuing NVIDIA packages (requires non-free repos)..."
+    add_if_available nvidia-driver
+    add_if_available nvidia-settings
+    add_if_available nvidia-prime
+    add_if_available firmware-misc-nonfree
   fi
 
   log "Installing packages..."
