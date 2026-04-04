@@ -1,0 +1,209 @@
+# ARKYN NOVA — Configuración de i3 (Manual en Español)
+
+Este archivo define el comportamiento del gestor de ventanas i3 en ARKYN NOVA.
+Está optimizado para productividad, velocidad y control total mediante teclado.
+
+---
+
+# 🔑 1. Tecla principal (MOD)
+
+set $mod Mod1
+
+- Mod1 = ALT
+- Esta será tu tecla principal para todos los atajos
+
+---
+
+# 🧠 2. Aplicaciones principales
+
+set $terminal alacritty
+set $browser firefox-esr
+set $launcher rofi -show drun
+set $filemanager thunar
+set $locker i3lock
+set $screenshot flameshot gui
+
+---
+
+# 🎨 3. Fuente
+
+font pango:JetBrains Mono 10
+
+---
+
+# 🎨 4. Colores (Tema ARKYN NOVA)
+
+set $bgcolor #0f111a
+set $in_bgcolor #1a1d2b
+set $text_color #c7d0e0
+set $text_dim #7f8ea3
+set $accent #7aa2f7
+set $urgent #f7768e
+
+client.focused          $accent $accent $bgcolor $text_color $accent
+client.focused_inactive $in_bgcolor $in_bgcolor $text_dim $text_dim $in_bgcolor
+client.unfocused        $bgcolor $bgcolor $text_dim $text_dim $bgcolor
+client.urgent           $urgent $urgent $bgcolor $bgcolor $urgent
+
+---
+
+# ⚙️ 5. Comportamiento del sistema
+
+focus_follows_mouse no
+mouse_warping none
+new_window pixel
+new_float normal
+hide_edge_borders smart
+focus_wrapping yes
+
+---
+
+# 🗂️ 6. Workspaces (Espacios de trabajo)
+
+set $ws1 "1:web"
+set $ws2 "2:code"
+set $ws3 "3:sys"
+set $ws4 "4:chat"
+set $ws5 "5:media"
+set $ws6 "6:files"
+set $ws7 "7:misc"
+set $ws8 "8:vm"
+set $ws9 "9:temp"
+
+---
+
+# 🚀 7. Inicio automático (Autostart)
+
+exec_always --no-startup-id feh --bg-fill ~/Pictures/wallpapers/arkyn-nova.png
+exec_always --no-startup-id picom
+exec_always --no-startup-id dunst
+exec_always --no-startup-id nm-applet
+exec_always --no-startup-id xss-lock --transfer-sleep-lock -- i3lock --nofork
+
+---
+
+# ⌨️ 8. Atajos principales
+
+## Abrir apps
+bindsym $mod+Return exec $terminal
+bindsym $mod+d exec $launcher
+
+## Ventanas
+bindsym $mod+Shift+q kill
+
+## Salir de i3
+bindsym $mod+Shift+e exec "i3-nagbar -t warning -m '¿Salir de ARKYN?' -B 'Salir' 'i3-msg exit'"
+
+---
+
+# 🧭 9. Navegación (tipo Vim)
+
+bindsym $mod+h focus left
+bindsym $mod+j focus down
+bindsym $mod+k focus up
+bindsym $mod+l focus right
+
+---
+
+# 📦 10. Mover ventanas
+
+bindsym $mod+Shift+h move left
+bindsym $mod+Shift+j move down
+bindsym $mod+Shift+k move up
+bindsym $mod+Shift+l move right
+
+---
+
+# 📐 11. Layouts
+
+bindsym $mod+v split v
+bindsym $mod+b split h
+bindsym $mod+f fullscreen toggle
+bindsym $mod+s layout stacking
+bindsym $mod+w layout tabbed
+bindsym $mod+e layout toggle split
+
+---
+
+# 🔄 12. Modo resize
+
+mode "resize" {
+    bindsym h resize shrink width 10 px
+    bindsym j resize grow height 10 px
+    bindsym k resize shrink height 10 px
+    bindsym l resize grow width 10 px
+
+    bindsym Return mode "default"
+    bindsym Escape mode "default"
+}
+
+bindsym $mod+r mode "resize"
+
+---
+
+# 🧱 13. Workspaces (atajos)
+
+bindsym $mod+1 workspace $ws1
+bindsym $mod+2 workspace $ws2
+bindsym $mod+3 workspace $ws3
+
+bindsym $mod+Shift+1 move container to workspace $ws1
+bindsym $mod+Shift+2 move container to workspace $ws2
+bindsym $mod+Shift+3 move container to workspace $ws3
+
+---
+
+# ⚡ 14. Acciones rápidas
+
+bindsym $mod+Shift+r restart
+bindsym $mod+Shift+c reload
+bindsym $mod+Shift+x exec $locker
+bindsym $mod+Shift+s exec $screenshot
+bindsym $mod+Shift+b exec $browser
+bindsym $mod+Shift+f exec $filemanager
+
+---
+
+# 🔊 15. Multimedia
+
+bindsym XF86AudioRaiseVolume exec pactl set-sink-volume @DEFAULT_SINK@ +5%
+bindsym XF86AudioLowerVolume exec pactl set-sink-volume @DEFAULT_SINK@ -5%
+bindsym XF86AudioMute exec pactl set-sink-mute @DEFAULT_SINK@ toggle
+
+---
+
+# 🪟 16. Ventanas flotantes
+
+for_window [class="Pavucontrol"] floating enable
+for_window [class="Nm-connection-editor"] floating enable
+
+---
+
+# 📊 17. Barra superior
+
+bar {
+    status_command i3status
+    position top
+}
+
+---
+
+# 🧠 FILOSOFÍA ARKYN NOVA
+
+- Todo controlado por teclado
+- Sin distracciones
+- Minimalismo funcional
+- Sistema rápido y predecible
+
+---
+
+# 🚀 Tips
+
+- ALT + ENTER → Terminal
+- ALT + D → Apps
+- ALT + SHIFT + Q → Cerrar
+- ALT + SHIFT + R → Reiniciar i3
+
+---
+
+Este es tu punto base. Desde aquí puedes construir tu propio flujo.
